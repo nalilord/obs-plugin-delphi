@@ -1,2 +1,2 @@
 # obs-plugin-delphi
-Translation of the OBS API for Plugins written in Delphi
+Translation of the OBS API for writing Plugins in Delphi
