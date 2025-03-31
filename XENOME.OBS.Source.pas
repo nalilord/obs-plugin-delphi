@@ -46,7 +46,7 @@ type
   POBSSourceInfo = ^TOBSSourceInfo;
   TOBSSourceInfo = record
     Id: PAnsiChar;
-	  Typ: TOBSSourceType;
+    Typ: TOBSSourceType;
     OutputFlags: Cardinal;
     GetName: TOBSSourceGetNameFunc;
     Create: TOBSSourceCreateFunc;

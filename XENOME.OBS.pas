@@ -4,25 +4,7 @@ interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, System.Win.Registry, System.IniFiles, System.Generics.Defaults,
-  System.Generics.Collections, System.Contnrs, System.SyncObjs, XENOME.OBS.Video;
-
-const
-  LIBOBS_API_MAJOR_VER = 30;
-  LIBOBS_API_MINOR_VER = 0;
-  LIBOBS_API_PATCH_VER = 2;
-  LIBOBS_API_VER       = (LIBOBS_API_MAJOR_VER SHL 24) OR (LIBOBS_API_MINOR_VER SHL 16) OR LIBOBS_API_PATCH_VER;
-
-const
-	LOG_ERROR   = 100;
-	LOG_WARNING = 200;
-	LOG_INFO    = 300;
-	LOG_DEBUG   = 400;
-
-type
-  TOBSEncoderType = (
-    OBS_ENCODER_AUDIO,
-    OBS_ENCODER_VIDEO
-  );
+  System.Generics.Collections, System.Contnrs, System.SyncObjs, XENOME.OBS.Types, XENOME.OBS.Video;
 
 type
   POBSSource = ^TOBSSource;

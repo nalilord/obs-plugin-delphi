@@ -38,7 +38,7 @@ type
 
   POBSDataNumber = ^TOBSDataNumber;
   TOBSDataNumber = record
-	  Typ: TOBSDataNumberType;
+    Typ: TOBSDataNumberType;
     case Integer of
       0: (
         IntVal: Int64;

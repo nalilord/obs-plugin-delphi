@@ -15,9 +15,9 @@ type
 
   POBSAudioData = ^TOBSAudioData;
   TOBSAudioData = record
-	  Data: POBSAudioDataArray;
-	  Frames: Cardinal;
-  	Timestamp: UInt64;
+    Data: POBSAudioDataArray;
+    Frames: Cardinal;
+    Timestamp: UInt64;
   end;
 
   TOBSAudioOutputData = record

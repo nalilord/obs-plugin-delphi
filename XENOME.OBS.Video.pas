@@ -4,79 +4,15 @@ interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, System.Win.Registry, System.IniFiles, System.Generics.Defaults,
-  System.Generics.Collections, System.Contnrs, System.SyncObjs;
-
-const
-  MAX_CONVERT_BUFFERS = 3;
-  MAX_CACHE_SIZE = 16;
-  MAX_AV_PLANES = 8;
-
-{$MINENUMSIZE 4}
+  System.Generics.Collections, System.Contnrs, System.SyncObjs, XENOME.OBS.Types;
 
 type
-  TOBSVideoFormat = (
-    VIDEO_FORMAT_NONE,
-    VIDEO_FORMAT_I420,
-    VIDEO_FORMAT_NV12,
-    VIDEO_FORMAT_YVYU,
-    VIDEO_FORMAT_YUY2,
-    VIDEO_FORMAT_UYVY,
-    VIDEO_FORMAT_RGBA,
-    VIDEO_FORMAT_BGRA,
-    VIDEO_FORMAT_BGRX,
-    VIDEO_FORMAT_Y800,
-    VIDEO_FORMAT_I444,
-    VIDEO_FORMAT_BGR3,
-    VIDEO_FORMAT_I422,
-    VIDEO_FORMAT_I40A,
-    VIDEO_FORMAT_I42A,
-    VIDEO_FORMAT_YUVA,
-    VIDEO_FORMAT_AYUV,
-    VIDEO_FORMAT_I010,
-    VIDEO_FORMAT_P010,
-    VIDEO_FORMAT_I210,
-    VIDEO_FORMAT_I412,
-    VIDEO_FORMAT_YA2L,
-    VIDEO_FORMAT_P216,
-    VIDEO_FORMAT_P416,
-    VIDEO_FORMAT_V210,
-    VIDEO_FORMAT_R10L
-  );
+  POBSVideoDataArray = ^TOBSVideoDataArray;
+  TOBSVideoDataArray = Array[0..MAX_AV_PLANES-1] of Byte;
 
-  TOBSVideoTRC = (
-    VIDEO_TRC_DEFAULT,
-    VIDEO_TRC_SRGB,
-    VIDEO_TRC_PQ,
-    VIDEO_TRC_HLG
-  );
-
-  TOBSVideoColorspace = (
-    VIDEO_CS_DEFAULT,
-    VIDEO_CS_601,
-    VIDEO_CS_709,
-    VIDEO_CS_SRGB,
-    VIDEO_CS_2100_PQ,
-    VIDEO_CS_2100_HLG
-  );
-
-  TOBSVideoRangeType = (
-    VIDEO_RANGE_DEFAULT,
-    VIDEO_RANGE_PARTIAL,
-    VIDEO_RANGE_FULL
-  );
-
-  TOBSVideoscaleType = (
-    VIDEO_SCALE_DEFAULT,
-    VIDEO_SCALE_POINT,
-    VIDEO_SCALE_FAST_BILINEAR,
-    VIDEO_SCALE_BILINEAR,
-    VIDEO_SCALE_BICUBIC
-  );
-
-type
   POBSVideoData = ^TOBSVideoData;
   TOBSVideoData = record // You should NOT use this directly, only translated for debugging purposes!
-    Data: Array [0..MAX_AV_PLANES-1] of Pointer;
+    Data: POBSVideoDataArray;
     LineSize: Array [0..MAX_AV_PLANES-1] of Cardinal;
     TimeStamp: UInt64;
   end;
@@ -112,7 +48,7 @@ type
     [volatile] SkippedFrames: Cardinal;
     [volatile] TotalFrames: Cardinal;
     InputMutex: Pointer;
-    Inputs: record Arr: Pointer; Num, Capacity: UInt64; end;
+    Inputs: TOBSDArray;
     AvailableFrames: UInt64;
     FirstAdded: UInt64;
     LastAdded: UInt64;
