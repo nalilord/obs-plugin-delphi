@@ -79,3 +79,10 @@ __recovery/
 
 # Boss dependency manager vendor folder https://github.com/HashLoad/boss
 modules/
+
+# Local workspace helpers and generated output
+Bin/
+Temp/
+.codex
+obs-studio-master/
+build.sh
