@@ -44,7 +44,6 @@ Heavy internal objects such as `TOBSSource` remain opaque unless there is a conc
 
 The intended build flow for `0.1` is RAD Studio:
 
-- open [`OBSStatsExport.dpr`](Source/OBSStatsExport.dpr)
 - open [`OBSDelphiTestPatternPlugin.dpr`](Sample/OBSDelphiTestPatternPlugin.dpr)
 - open [`OBSDelphiFrontendSmokePlugin.dpr`](Sample/OBSDelphiFrontendSmokePlugin.dpr)
 - build for `Win64`
@@ -57,8 +56,6 @@ Current sample/runtime smoke plugins:
   Registers `Delphi Test Pattern + Tone`, an async source that generates video and audio.
 - [`OBSDelphiFrontendSmokePlugin.dpr`](Sample/OBSDelphiFrontendSmokePlugin.dpr)
   Adds a Tools menu item and exercises frontend, global signals, source/output enumeration, and task queue callbacks.
-
-There is also a small utility plugin in [`OBSStatsExport.dpr`](Source/OBSStatsExport.dpr) that exercises output statistics and frontend menu wiring.
 
 ## Ownership Rules
 
@@ -81,7 +78,6 @@ After building and copying the DLLs into your OBS plugin setup:
 4. Load `OBSDelphiFrontendSmokePlugin.dll`.
 5. Open the Tools menu and click `Delphi Frontend Smoke`.
 6. Rename or remove a source and confirm signal output appears in the plugin console.
-7. Optionally load `OBSStatsExport.dll` and confirm its menu item and output-stat hooks still behave.
 
 ## Notes
 
