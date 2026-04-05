@@ -84,5 +84,6 @@ modules/
 Bin/
 Temp/
 .codex
+Plugin/
 obs-studio-master/
 build.sh
