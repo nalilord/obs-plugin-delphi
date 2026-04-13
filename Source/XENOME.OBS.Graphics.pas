@@ -6,6 +6,9 @@ uses
   XENOME.OBS.Types, XENOME.OBS.Math;
 
 type
+  POBSGraphics = ^TOBSGraphics;
+  TOBSGraphics = record end;
+
   POBSGSEffect = ^TOBSGSEffect;
   TOBSGSEffect = record end;
 
@@ -45,8 +48,22 @@ type
   POBSGSTimerRange = ^TOBSGSTimerRange;
   TOBSGSTimerRange = record end;
 
+  TOBSGSAdapterEnumCallback = function(Param: Pointer; Name: PAnsiChar; Id: Cardinal): Boolean cdecl;
+
 function obs_get_base_effect(AEffect: TOBSBaseEffect): POBSGSEffect; cdecl; external 'obs.dll' name 'obs_get_base_effect';
 function obs_get_main_texture: POBSGSTexture; cdecl; external 'obs.dll' name 'obs_get_main_texture';
+function gs_get_device_name: PAnsiChar; cdecl; external 'obs.dll' name 'gs_get_device_name';
+function gs_get_driver_version: PAnsiChar; cdecl; external 'obs.dll' name 'gs_get_driver_version';
+function gs_get_renderer: PAnsiChar; cdecl; external 'obs.dll' name 'gs_get_renderer';
+function gs_get_gpu_dmem: UInt64; cdecl; external 'obs.dll' name 'gs_get_gpu_dmem';
+function gs_get_gpu_smem: UInt64; cdecl; external 'obs.dll' name 'gs_get_gpu_smem';
+function gs_get_device_type: Integer; cdecl; external 'obs.dll' name 'gs_get_device_type';
+function gs_get_adapter_count: Cardinal; cdecl; external 'obs.dll' name 'gs_get_adapter_count';
+procedure gs_enum_adapters(ACallback: TOBSGSAdapterEnumCallback; AParam: Pointer); cdecl; external 'obs.dll' name 'gs_enum_adapters';
+procedure gs_enter_context(AGraphics: POBSGraphics); cdecl; external 'obs.dll' name 'gs_enter_context';
+procedure gs_leave_context; cdecl; external 'obs.dll' name 'gs_leave_context';
+function gs_get_context: POBSGraphics; cdecl; external 'obs.dll' name 'gs_get_context';
+function gs_get_device_obj: Pointer; cdecl; external 'obs.dll' name 'gs_get_device_obj';
 function gs_get_effect: POBSGSEffect; cdecl; external 'obs.dll' name 'gs_get_effect';
 function gs_effect_create_from_file(AFile: PAnsiChar; AErrorString: PPAnsiChar): POBSGSEffect; cdecl; external 'obs.dll' name 'gs_effect_create_from_file';
 function gs_effect_create(AEffectString, AFilename: PAnsiChar; AErrorString: PPAnsiChar): POBSGSEffect; cdecl; external 'obs.dll' name 'gs_effect_create';

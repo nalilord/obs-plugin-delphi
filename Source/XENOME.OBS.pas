@@ -132,6 +132,62 @@ type
     Fixed: Boolean;
   end;
 
+  POBSEncoderPacketTime = ^TOBSEncoderPacketTime;
+  TOBSEncoderPacketTime = record
+    PTS: Int64;
+    CTS: UInt64;
+    FER: UInt64;
+    FERC: UInt64;
+    PIR: UInt64;
+  end;
+
+  POBSEncoderPacket = ^TOBSEncoderPacket;
+  TOBSEncoderPacket = record
+    Data: PByte;
+    Size: NativeUInt;
+    PTS: Int64;
+    DTS: Int64;
+    TimebaseNum: Int32;
+    TimebaseDen: Int32;
+    Typ: TOBSEncoderType;
+    KeyFrame: Boolean;
+    DTSUsec: Int64;
+    SysDTSUsec: Int64;
+    Priority: Integer;
+    DropPriority: Integer;
+    TrackIdx: NativeUInt;
+    Encoder: POBSEncoder;
+  end;
+
+  POBSEncoderFrame = ^TOBSEncoderFrame;
+  TOBSEncoderFrame = record
+    Data: array[0..MAX_AV_PLANES - 1] of PByte;
+    LineSize: array[0..MAX_AV_PLANES - 1] of Cardinal;
+    Frames: Cardinal;
+    PTS: Int64;
+  end;
+
+  POBSEncoderROI = ^TOBSEncoderROI;
+  TOBSEncoderROI = record
+    Top: Cardinal;
+    Bottom: Cardinal;
+    Left: Cardinal;
+    Right: Cardinal;
+    Priority: Single;
+  end;
+
+  POBSEncoderTexture = ^TOBSEncoderTexture;
+  TOBSEncoderTexture = record
+    Handle: Cardinal;
+    Textures: array[0..3] of POBSGSTexture;
+  end;
+
+  POBSServiceResolution = ^TOBSServiceResolution;
+  TOBSServiceResolution = record
+    CX: Integer;
+    CY: Integer;
+  end;
+
 type
   TOBSProc = procedure cdecl;
   TOBSFunc<TResult> = function: TResult cdecl;
@@ -146,6 +202,152 @@ type
   TOBSSignalCallback = procedure(Data: Pointer; Params: POBSCallData) cdecl;
   TOBSGlobalSignalCallback = procedure(Data: Pointer; Signal: PAnsiChar; Params: POBSCallData) cdecl;
   TOBSProcHandlerProc = procedure(Data: Pointer; Params: POBSCallData) cdecl;
+  TOBSOutputPacketCallback = procedure(Output: POBSOutput; Packet: POBSEncoderPacket; PacketTime: POBSEncoderPacketTime; Param: Pointer) cdecl;
+  TOBSOutputReconnectCallback = function(Data: Pointer; Output: POBSOutput; Code: Integer): Boolean cdecl;
+  TOBSOutputGetNameCallback = function(TypeData: Pointer): PAnsiChar cdecl;
+  TOBSOutputCreateCallback = function(Settings: POBSData; Output: POBSOutput): Pointer cdecl;
+  TOBSOutputDestroyCallback = procedure(Data: Pointer) cdecl;
+  TOBSOutputStartCallback = function(Data: Pointer): Boolean cdecl;
+  TOBSOutputStopCallback = procedure(Data: Pointer; TS: UInt64) cdecl;
+  TOBSOutputRawVideoCallback = procedure(Data: Pointer; Frame: POBSVideoData) cdecl;
+  TOBSOutputRawAudioCallback = procedure(Data: Pointer; Frames: Pointer) cdecl;
+  TOBSOutputRawAudio2Callback = procedure(Data: Pointer; Idx: NativeUInt; Frames: Pointer) cdecl;
+  TOBSOutputEncodedPacketCallback = procedure(Data: Pointer; Packet: POBSEncoderPacket) cdecl;
+  TOBSOutputUpdateCallback = procedure(Data: Pointer; Settings: POBSData) cdecl;
+  TOBSOutputGetDefaultsCallback = procedure(Settings: POBSData) cdecl;
+  TOBSOutputGetPropertiesCallback = function(Data: Pointer): POBSProperties cdecl;
+  TOBSOutputGetTotalBytesCallback = function(Data: Pointer): UInt64 cdecl;
+  TOBSOutputGetDroppedFramesCallback = function(Data: Pointer): Integer cdecl;
+  TOBSOutputFreeTypeDataCallback = procedure(TypeData: Pointer) cdecl;
+  TOBSOutputGetCongestionCallback = function(Data: Pointer): Single cdecl;
+  TOBSOutputGetConnectTimeMsCallback = function(Data: Pointer): Integer cdecl;
+
+  TOBSEncoderGetNameCallback = function(TypeData: Pointer): PAnsiChar cdecl;
+  TOBSEncoderCreateCallback = function(Settings: POBSData; Encoder: POBSEncoder): Pointer cdecl;
+  TOBSEncoderDestroyCallback = procedure(Data: Pointer) cdecl;
+  TOBSEncoderEncodeCallback = function(Data: Pointer; Frame: POBSEncoderFrame; Packet: POBSEncoderPacket;
+    ReceivedPacket: PBoolean): Boolean cdecl;
+  TOBSEncoderGetFrameSizeCallback = function(Data: Pointer): NativeUInt cdecl;
+  TOBSEncoderGetDefaultsCallback = procedure(Settings: POBSData) cdecl;
+  TOBSEncoderGetPropertiesCallback = function(Data: Pointer): POBSProperties cdecl;
+  TOBSEncoderUpdateCallback = function(Data: Pointer; Settings: POBSData): Boolean cdecl;
+  TOBSEncoderGetExtraDataCallback = function(Data: Pointer; ExtraData: PPByte; Size: PNativeUInt): Boolean cdecl;
+  TOBSEncoderGetSEIDataCallback = function(Data: Pointer; SEIData: PPByte; Size: PNativeUInt): Boolean cdecl;
+  TOBSEncoderGetAudioInfoCallback = procedure(Data: Pointer; Info: POBSAudioConvertInfo) cdecl;
+  TOBSEncoderGetVideoInfoCallback = procedure(Data: Pointer; Info: POBSVideoScaleInfo) cdecl;
+  TOBSEncoderGetDefaults2Callback = procedure(Settings: POBSData; TypeData: Pointer) cdecl;
+  TOBSEncoderGetProperties2Callback = function(Data, TypeData: Pointer): POBSProperties cdecl;
+  TOBSEncoderEncodeTextureCallback = function(Data: Pointer; Handle: Cardinal; PTS: Int64; LockKey: UInt64;
+    NextKey: PUInt64; Packet: POBSEncoderPacket; ReceivedPacket: PBoolean): Boolean cdecl;
+  TOBSEncoderEncodeTexture2Callback = function(Data: Pointer; Texture: POBSEncoderTexture; PTS: Int64;
+    LockKey: UInt64; NextKey: PUInt64; Packet: POBSEncoderPacket; ReceivedPacket: PBoolean): Boolean cdecl;
+  TOBSEncoderGetPrimingSamplesCallback = function(Data: Pointer): Cardinal cdecl;
+
+  TOBSServiceGetNameCallback = function(TypeData: Pointer): PAnsiChar cdecl;
+  TOBSServiceCreateCallback = function(Settings: POBSData; Service: POBSService): Pointer cdecl;
+  TOBSServiceDestroyCallback = procedure(Data: Pointer) cdecl;
+  TOBSServiceActivateCallback = procedure(Data: Pointer; Settings: POBSData) cdecl;
+  TOBSServiceDeactivateCallback = procedure(Data: Pointer) cdecl;
+  TOBSServiceUpdateCallback = procedure(Data: Pointer; Settings: POBSData) cdecl;
+  TOBSServiceGetDefaultsCallback = procedure(Settings: POBSData) cdecl;
+  TOBSServiceGetPropertiesCallback = function(Data: Pointer): POBSProperties cdecl;
+  TOBSServiceInitializeCallback = function(Data: Pointer; Output: POBSOutput): Boolean cdecl;
+  TOBSServiceGetStringCallback = function(Data: Pointer): PAnsiChar cdecl;
+  TOBSServiceApplyEncoderSettingsCallback = procedure(Data: Pointer; VideoEncoderSettings, AudioEncoderSettings: POBSData) cdecl;
+  TOBSServiceFreeTypeDataCallback = procedure(TypeData: Pointer) cdecl;
+  TOBSServiceGetOutputTypeCallback = function(Data: Pointer): PAnsiChar cdecl;
+  TOBSServiceGetSupportedResolutionsCallback = procedure(Data: Pointer; out Resolutions: POBSServiceResolution; out Count: NativeUInt) cdecl;
+  TOBSServiceGetMaxFPSCallback = procedure(Data: Pointer; FPS: PInteger) cdecl;
+  TOBSServiceGetMaxBitrateCallback = procedure(Data: Pointer; VideoBitrate, AudioBitrate: PInteger) cdecl;
+  TOBSServiceGetSupportedCodecsCallback = function(Data: Pointer): PPAnsiChar cdecl;
+  TOBSServiceGetConnectInfoCallback = function(Data: Pointer; InfoType: Cardinal): PAnsiChar cdecl;
+  TOBSServiceCanTryToConnectCallback = function(Data: Pointer): Boolean cdecl;
+
+  POBSOutputInfo = ^TOBSOutputInfo;
+  TOBSOutputInfo = record
+    Id: PAnsiChar;
+    Flags: Cardinal;
+    GetName: TOBSOutputGetNameCallback;
+    Create: TOBSOutputCreateCallback;
+    Destroy: TOBSOutputDestroyCallback;
+    Start: TOBSOutputStartCallback;
+    Stop: TOBSOutputStopCallback;
+    RawVideo: TOBSOutputRawVideoCallback;
+    RawAudio: TOBSOutputRawAudioCallback;
+    EncodedPacket: TOBSOutputEncodedPacketCallback;
+    Update: TOBSOutputUpdateCallback;
+    GetDefaults: TOBSOutputGetDefaultsCallback;
+    GetProperties: TOBSOutputGetPropertiesCallback;
+    Unused1: TOBSOutputDestroyCallback;
+    GetTotalBytes: TOBSOutputGetTotalBytesCallback;
+    GetDroppedFrames: TOBSOutputGetDroppedFramesCallback;
+    TypeData: Pointer;
+    FreeTypeData: TOBSOutputFreeTypeDataCallback;
+    GetCongestion: TOBSOutputGetCongestionCallback;
+    GetConnectTimeMs: TOBSOutputGetConnectTimeMsCallback;
+    EncodedVideoCodecs: PAnsiChar;
+    EncodedAudioCodecs: PAnsiChar;
+    RawAudio2: TOBSOutputRawAudio2Callback;
+    Protocols: PAnsiChar;
+  end;
+
+  POBSEncoderInfo = ^TOBSEncoderInfo;
+  TOBSEncoderInfo = record
+    Id: PAnsiChar;
+    Typ: TOBSEncoderType;
+    Codec: PAnsiChar;
+    GetName: TOBSEncoderGetNameCallback;
+    Create: TOBSEncoderCreateCallback;
+    Destroy: TOBSEncoderDestroyCallback;
+    Encode: TOBSEncoderEncodeCallback;
+    GetFrameSize: TOBSEncoderGetFrameSizeCallback;
+    GetDefaults: TOBSEncoderGetDefaultsCallback;
+    GetProperties: TOBSEncoderGetPropertiesCallback;
+    Update: TOBSEncoderUpdateCallback;
+    GetExtraData: TOBSEncoderGetExtraDataCallback;
+    GetSEIData: TOBSEncoderGetSEIDataCallback;
+    GetAudioInfo: TOBSEncoderGetAudioInfoCallback;
+    GetVideoInfo: TOBSEncoderGetVideoInfoCallback;
+    TypeData: Pointer;
+    FreeTypeData: TOBSEncoderDestroyCallback;
+    Caps: Cardinal;
+    GetDefaults2: TOBSEncoderGetDefaults2Callback;
+    GetProperties2: TOBSEncoderGetProperties2Callback;
+    EncodeTexture: TOBSEncoderEncodeTextureCallback;
+    EncodeTexture2: TOBSEncoderEncodeTexture2Callback;
+    GetPrimingSamples: TOBSEncoderGetPrimingSamplesCallback;
+  end;
+
+  POBSServiceInfo = ^TOBSServiceInfo;
+  TOBSServiceInfo = record
+    Id: PAnsiChar;
+    GetName: TOBSServiceGetNameCallback;
+    Create: TOBSServiceCreateCallback;
+    Destroy: TOBSServiceDestroyCallback;
+    Activate: TOBSServiceActivateCallback;
+    Deactivate: TOBSServiceDeactivateCallback;
+    Update: TOBSServiceUpdateCallback;
+    GetDefaults: TOBSServiceGetDefaultsCallback;
+    GetProperties: TOBSServiceGetPropertiesCallback;
+    Initialize: TOBSServiceInitializeCallback;
+    GetURL: TOBSServiceGetStringCallback;
+    GetKey: TOBSServiceGetStringCallback;
+    GetUsername: TOBSServiceGetStringCallback;
+    GetPassword: TOBSServiceGetStringCallback;
+    Deprecated1: Pointer;
+    ApplyEncoderSettings: TOBSServiceApplyEncoderSettingsCallback;
+    TypeData: Pointer;
+    FreeTypeData: TOBSServiceFreeTypeDataCallback;
+    GetOutputType: TOBSServiceGetOutputTypeCallback;
+    GetSupportedResolutions: TOBSServiceGetSupportedResolutionsCallback;
+    GetMaxFPS: TOBSServiceGetMaxFPSCallback;
+    GetMaxBitrate: TOBSServiceGetMaxBitrateCallback;
+    GetSupportedVideoCodecs: TOBSServiceGetSupportedCodecsCallback;
+    GetProtocol: TOBSServiceGetStringCallback;
+    GetSupportedAudioCodecs: TOBSServiceGetSupportedCodecsCallback;
+    GetConnectInfo: TOBSServiceGetConnectInfoCallback;
+    CanTryToConnect: TOBSServiceCanTryToConnectCallback;
+  end;
 
   TOBSEnumSourcesCallback = function(Param: Pointer; Source: POBSSource): Boolean cdecl;
   POBSEnumSourcesCallback = TOBSEnumSourcesCallback;
@@ -207,7 +409,12 @@ type
   end;
 
 procedure obs_log(ALogLevel: Integer; const AFormat: PAnsiChar); cdecl; varargs; external 'obs.dll' name 'blog';
+function bmalloc(ASize: NativeUInt): Pointer; cdecl; external 'obs.dll' name 'bmalloc';
+function brealloc(APtr: Pointer; ASize: NativeUInt): Pointer; cdecl; external 'obs.dll' name 'brealloc';
 procedure bfree(APtr: Pointer); cdecl; external 'obs.dll' name 'bfree';
+function base_get_alignment: Integer; cdecl; external 'obs.dll' name 'base_get_alignment';
+function bnum_allocs: LongInt; cdecl; external 'obs.dll' name 'bnum_allocs';
+function bmemdup(const APtr: Pointer; ASize: NativeUInt): Pointer; cdecl; external 'obs.dll' name 'bmemdup';
 
 procedure obs_shutdown; cdecl; external 'obs.dll' name 'obs_shutdown';
 function obs_initialized: Boolean; cdecl; external 'obs.dll' name 'obs_initialized';
@@ -282,6 +489,8 @@ procedure obs_enum_canvases(ACallback: POBSEnumCanvasesCallback; AParam: Pointer
 
 function obs_get_encoder_codec(AID: PAnsiChar): PAnsiChar; cdecl; external 'obs.dll' name 'obs_get_encoder_codec';
 function obs_get_encoder_type(AID: PAnsiChar): TOBSEncoderType; cdecl; external 'obs.dll' name 'obs_get_encoder_type';
+procedure obs_register_encoder_s(AInfo: POBSEncoderInfo; ASize: NativeUInt); cdecl; external 'obs.dll' name 'obs_register_encoder_s';
+procedure obs_register_encoder(AInfo: POBSEncoderInfo);
 function obs_encoder_get_display_name(AID: PAnsiChar): PAnsiChar; cdecl; external 'obs.dll' name 'obs_encoder_get_display_name';
 function obs_encoder_get_name(AEncoder: POBSEncoder): PAnsiChar; cdecl; external 'obs.dll' name 'obs_encoder_get_name';
 function obs_encoder_get_id(AEncoder: POBSEncoder): PAnsiChar; cdecl; external 'obs.dll' name 'obs_encoder_get_id';
@@ -294,6 +503,8 @@ function obs_encoder_gpu_scaling_enabled(AEncoder: POBSEncoder): Boolean; cdecl;
 function obs_output_get_display_name(AID: PAnsiChar): PAnsiChar; cdecl; external 'obs.dll' name 'obs_output_get_display_name';
 function obs_output_get_module(AID: PAnsiChar): POBSModule; cdecl; external 'obs.dll' name 'obs_output_get_module';
 function obs_output_load_state(AID: PAnsiChar): TOBSModuleLoadState; cdecl; external 'obs.dll' name 'obs_output_load_state';
+procedure obs_register_output_s(AInfo: POBSOutputInfo; ASize: NativeUInt); cdecl; external 'obs.dll' name 'obs_register_output_s';
+procedure obs_register_output(AInfo: POBSOutputInfo);
 function obs_output_create(AID, AName: PAnsiChar; ASettings, AHotkeyData: POBSData): POBSOutput; cdecl; external 'obs.dll' name 'obs_output_create';
 procedure obs_output_release(AOutput: POBSOutput); cdecl; external 'obs.dll' name 'obs_output_release';
 procedure obs_weak_output_addref(AWeak: POBSWeakOutput); cdecl; external 'obs.dll' name 'obs_weak_output_addref';
@@ -346,7 +557,13 @@ function obs_output_get_last_error(AOutput: POBSOutput): PAnsiChar; cdecl; exter
 function obs_output_get_supported_video_codecs(AOutput: POBSOutput): PAnsiChar; cdecl; external 'obs.dll' name 'obs_output_get_supported_video_codecs';
 function obs_output_get_supported_audio_codecs(AOutput: POBSOutput): PAnsiChar; cdecl; external 'obs.dll' name 'obs_output_get_supported_audio_codecs';
 function obs_output_get_protocols(AOutput: POBSOutput): PAnsiChar; cdecl; external 'obs.dll' name 'obs_output_get_protocols';
+procedure obs_output_add_packet_callback(AOutput: POBSOutput; APacketCallback: TOBSOutputPacketCallback; AParam: Pointer); cdecl; external 'obs.dll' name 'obs_output_add_packet_callback';
+procedure obs_output_remove_packet_callback(AOutput: POBSOutput; APacketCallback: TOBSOutputPacketCallback; AParam: Pointer); cdecl; external 'obs.dll' name 'obs_output_remove_packet_callback';
+procedure obs_output_set_reconnect_callback(AOutput: POBSOutput; AReconnectCallback: TOBSOutputReconnectCallback; AParam: Pointer); cdecl; external 'obs.dll' name 'obs_output_set_reconnect_callback';
 function obs_output_get_type_data(AOutput: POBSOutput): Pointer; cdecl; external 'obs.dll' name 'obs_output_get_type_data';
+function obs_output_get_video_conversion(AOutput: POBSOutput): POBSVideoScaleInfo; cdecl; external 'obs.dll' name 'obs_output_get_video_conversion';
+procedure obs_output_set_video_conversion(AOutput: POBSOutput; AConversion: POBSVideoScaleInfo); cdecl; external 'obs.dll' name 'obs_output_set_video_conversion';
+procedure obs_output_set_audio_conversion(AOutput: POBSOutput; AConversion: POBSAudioConvertInfo); cdecl; external 'obs.dll' name 'obs_output_set_audio_conversion';
 function obs_output_can_begin_data_capture(AOutput: POBSOutput; AFlags: Cardinal): Boolean; cdecl; external 'obs.dll' name 'obs_output_can_begin_data_capture';
 function obs_output_initialize_encoders(AOutput: POBSOutput; AFlags: Cardinal): Boolean; cdecl; external 'obs.dll' name 'obs_output_initialize_encoders';
 function obs_output_begin_data_capture(AOutput: POBSOutput; AFlags: Cardinal): Boolean; cdecl; external 'obs.dll' name 'obs_output_begin_data_capture';
@@ -398,6 +615,7 @@ function obs_encoder_active(AEncoder: POBSEncoder): Boolean; cdecl; external 'ob
 function obs_encoder_get_type_data(AEncoder: POBSEncoder): Pointer; cdecl; external 'obs.dll' name 'obs_encoder_get_type_data';
 function obs_get_encoder_caps(AEncoderID: PAnsiChar): Cardinal; cdecl; external 'obs.dll' name 'obs_get_encoder_caps';
 function obs_encoder_get_caps(AEncoder: POBSEncoder): Cardinal; cdecl; external 'obs.dll' name 'obs_encoder_get_caps';
+function obs_encoder_get_extra_data(AEncoder: POBSEncoder; AExtraData: PPByte; ASize: PNativeUInt): Boolean; cdecl; external 'obs.dll' name 'obs_encoder_get_extra_data';
 function obs_encoder_paused(AEncoder: POBSEncoder): Boolean; cdecl; external 'obs.dll' name 'obs_encoder_paused';
 function obs_encoder_get_last_error(AEncoder: POBSEncoder): PAnsiChar; cdecl; external 'obs.dll' name 'obs_encoder_get_last_error';
 procedure obs_encoder_set_last_error(AEncoder: POBSEncoder; AMessage: PAnsiChar); cdecl; external 'obs.dll' name 'obs_encoder_set_last_error';
@@ -405,10 +623,14 @@ function obs_encoder_get_pause_offset(AEncoder: POBSEncoder): UInt64; cdecl; ext
 function obs_encoder_set_group(AEncoder: POBSEncoder; AGroup: POBSEncoderGroup): Boolean; cdecl; external 'obs.dll' name 'obs_encoder_set_group';
 function obs_encoder_group_create: POBSEncoderGroup; cdecl; external 'obs.dll' name 'obs_encoder_group_create';
 procedure obs_encoder_group_destroy(AGroup: POBSEncoderGroup); cdecl; external 'obs.dll' name 'obs_encoder_group_destroy';
+procedure obs_encoder_packet_ref(ADst, ASrc: POBSEncoderPacket); cdecl; external 'obs.dll' name 'obs_encoder_packet_ref';
+procedure obs_encoder_packet_release(APacket: POBSEncoderPacket); cdecl; external 'obs.dll' name 'obs_encoder_packet_release';
 
 function obs_service_get_display_name(AID: PAnsiChar): PAnsiChar; cdecl; external 'obs.dll' name 'obs_service_get_display_name';
 function obs_service_get_module(AID: PAnsiChar): POBSModule; cdecl; external 'obs.dll' name 'obs_service_get_module';
 function obs_service_load_state(AID: PAnsiChar): TOBSModuleLoadState; cdecl; external 'obs.dll' name 'obs_service_load_state';
+procedure obs_register_service_s(AInfo: POBSServiceInfo; ASize: NativeUInt); cdecl; external 'obs.dll' name 'obs_register_service_s';
+procedure obs_register_service(AInfo: POBSServiceInfo);
 function obs_service_create(AID, AName: PAnsiChar; ASettings, AHotkeyData: POBSData): POBSService; cdecl; external 'obs.dll' name 'obs_service_create';
 function obs_service_create_private(AID, AName: PAnsiChar; ASettings: POBSData): POBSService; cdecl; external 'obs.dll' name 'obs_service_create_private';
 procedure obs_service_release(AService: POBSService); cdecl; external 'obs.dll' name 'obs_service_release';
@@ -425,8 +647,22 @@ function obs_service_properties(AService: POBSService): POBSProperties; cdecl; e
 function obs_service_get_type(AService: POBSService): PAnsiChar; cdecl; external 'obs.dll' name 'obs_service_get_type';
 procedure obs_service_update(AService: POBSService; ASettings: POBSData); cdecl; external 'obs.dll' name 'obs_service_update';
 function obs_service_get_settings(AService: POBSService): POBSData; cdecl; external 'obs.dll' name 'obs_service_get_settings';
+procedure obs_service_apply_encoder_settings(AService: POBSService; AVideoEncoderSettings, AAudioEncoderSettings: POBSData); cdecl; external 'obs.dll' name 'obs_service_apply_encoder_settings';
 function obs_service_get_type_data(AService: POBSService): Pointer; cdecl; external 'obs.dll' name 'obs_service_get_type_data';
 function obs_service_get_id(AService: POBSService): PAnsiChar; cdecl; external 'obs.dll' name 'obs_service_get_id';
+procedure obs_service_get_supported_resolutions(AService: POBSService; out AResolutions: POBSServiceResolution; out ACount: NativeUInt); cdecl; external 'obs.dll' name 'obs_service_get_supported_resolutions';
+procedure obs_service_get_max_fps(AService: POBSService; AFPS: PInteger); cdecl; external 'obs.dll' name 'obs_service_get_max_fps';
+procedure obs_service_get_max_bitrate(AService: POBSService; AVideoBitrate, AAudioBitrate: PInteger); cdecl; external 'obs.dll' name 'obs_service_get_max_bitrate';
+function obs_service_get_supported_video_codecs(AService: POBSService): PPAnsiChar; cdecl; external 'obs.dll' name 'obs_service_get_supported_video_codecs';
+function obs_service_get_supported_audio_codecs(AService: POBSService): PPAnsiChar; cdecl; external 'obs.dll' name 'obs_service_get_supported_audio_codecs';
+function obs_service_get_protocol(AService: POBSService): PAnsiChar; cdecl; external 'obs.dll' name 'obs_service_get_protocol';
+function obs_service_get_preferred_output_type(AService: POBSService): PAnsiChar; cdecl; external 'obs.dll' name 'obs_service_get_preferred_output_type';
+function obs_service_get_connect_info(AService: POBSService; AInfoType: Cardinal): PAnsiChar; cdecl; external 'obs.dll' name 'obs_service_get_connect_info';
+function obs_service_can_try_to_connect(AService: POBSService): Boolean; cdecl; external 'obs.dll' name 'obs_service_can_try_to_connect';
+procedure obs_service_resolution_list_free(AResolutions: POBSServiceResolution);
+function obs_string_list_count(AList: PPAnsiChar): NativeUInt;
+function obs_string_list_item(AList: PPAnsiChar; AIndex: NativeUInt): PAnsiChar;
+function obs_string_list_join(AList: PPAnsiChar; const ASeparator: AnsiString = ', '): AnsiString;
 
 function obs_output_get_id(AOutput: POBSOutput): PAnsiChar; cdecl; external 'obs.dll' name 'obs_output_get_id';
 function obs_output_get_name(AOutput: POBSOutput): PAnsiChar; cdecl; external 'obs.dll' name 'obs_output_get_name';
@@ -485,6 +721,79 @@ procedure calldata_set_ptr(AData: POBSCallData; AName: PAnsiChar; AValue: Pointe
 procedure calldata_set_string(AData: POBSCallData; AName: PAnsiChar; AValue: PAnsiChar);
 
 implementation
+
+procedure obs_register_encoder(AInfo: POBSEncoderInfo);
+begin
+  obs_register_encoder_s(AInfo, SizeOf(TOBSEncoderInfo));
+end;
+
+procedure obs_register_output(AInfo: POBSOutputInfo);
+begin
+  obs_register_output_s(AInfo, SizeOf(TOBSOutputInfo));
+end;
+
+procedure obs_register_service(AInfo: POBSServiceInfo);
+begin
+  obs_register_service_s(AInfo, SizeOf(TOBSServiceInfo));
+end;
+
+procedure obs_service_resolution_list_free(AResolutions: POBSServiceResolution);
+begin
+  { OBS frontend code frees these lists with bfree() (BPtr<obs_service_resolution>). }
+  if AResolutions <> nil then
+    bfree(AResolutions);
+end;
+
+function obs_string_list_count(AList: PPAnsiChar): NativeUInt;
+var
+  Items: POBSAnsiStringArray;
+begin
+  Result:=0;
+  if AList = nil then
+    Exit;
+
+  Items:=POBSAnsiStringArray(AList);
+  while Items^[Result] <> nil do
+    Inc(Result);
+end;
+
+function obs_string_list_item(AList: PPAnsiChar; AIndex: NativeUInt): PAnsiChar;
+var
+  Items: POBSAnsiStringArray;
+begin
+  if AList <> nil then
+  begin
+    Items:=POBSAnsiStringArray(AList);
+    Result:=Items^[AIndex]
+  end
+  else
+    Result:=nil;
+end;
+
+function obs_string_list_join(AList: PPAnsiChar; const ASeparator: AnsiString): AnsiString;
+var
+  Index: NativeUInt;
+  Item: PAnsiChar;
+  Items: POBSAnsiStringArray;
+begin
+  Result:='';
+  Index:=0;
+
+  if AList = nil then
+    Exit;
+
+  Items:=POBSAnsiStringArray(AList);
+  Item:=Items^[Index];
+  while Item <> nil do
+  begin
+    if Result <> '' then
+      Result:=Result + ASeparator;
+
+    Result:=Result + AnsiString(Item);
+    Inc(Index);
+    Item:=Items^[Index];
+  end;
+end;
 
 procedure calldata_init(AData: POBSCallData);
 begin

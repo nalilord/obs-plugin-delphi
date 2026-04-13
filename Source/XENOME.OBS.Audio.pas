@@ -32,14 +32,6 @@ type
     InputParam: Pointer;
   end;
 
-  POBSAudioConvertInfo = ^TOBSAudioConvertInfo;
-  TOBSAudioConvertInfo = record
-    SamplesPerSec: Cardinal;
-    Format: TOBSAudioFormat;
-    Speakers: TOBSSpeakerLayout;
-    AllowClipping: Boolean;
-  end;
-
 function audio_output_open(out AAudio: POBSAudio; AInfo: POBSAudioOutputInfo): Integer; cdecl; external 'obs.dll' name 'audio_output_open';
 procedure audio_output_close(AAudio: POBSAudio); cdecl; external 'obs.dll' name 'audio_output_close';
 
