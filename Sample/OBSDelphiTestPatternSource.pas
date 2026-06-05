@@ -350,7 +350,7 @@ begin
   TestSourceInfo.VideoTick:=@TestSourceVideoTick;
   TestSourceInfo.IconType:=OBS_ICON_TYPE_CUSTOM;
   TestSourceInfo.Version:=1;
-  obs_register_source_s(@TestSourceInfo, SizeOf(TestSourceInfo));
+  obs_register_source(@TestSourceInfo);
 end;
 
 end.

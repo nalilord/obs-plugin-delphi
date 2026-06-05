@@ -120,7 +120,7 @@ begin
   PassthroughFilterInfo.GetHeight:=@OBSDelphiPassthroughFilterGetHeight;
   PassthroughFilterInfo.VideoRender:=@OBSDelphiPassthroughFilterVideoRender;
 
-  obs_register_source_s(@PassthroughFilterInfo, SizeOf(PassthroughFilterInfo));
+  obs_register_source(@PassthroughFilterInfo);
 end;
 
 end.

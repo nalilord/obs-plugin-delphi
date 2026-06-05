@@ -181,9 +181,12 @@ type
     MissingFiles: TOBSSourceFunc<POBSMissingFiles,Pointer>;
     VideoGetColorSpace: TOBSSourceFunc3<TOBSGSColorSpace,Pointer,NativeUInt,POBSGSColorSpace>;
     FilterAdd: TOBSSourceProc2<Pointer,POBSSource>;
+    GetDarkIcon: TOBSSourceFunc<PAnsiChar,Pointer>;
+    GetLightIcon: TOBSSourceFunc<PAnsiChar,Pointer>;
   end;
 
 procedure obs_register_source_s(AInfo: POBSSourceInfo; ASize: NativeUInt); cdecl; external 'obs.dll' name 'obs_register_source_s';
+procedure obs_register_source(AInfo: POBSSourceInfo);
 procedure obs_set_output_source(AChannel: Cardinal; ASource: POBSSource); cdecl; external 'obs.dll' name 'obs_set_output_source';
 function obs_get_output_source(AChannel: Cardinal): POBSSource; cdecl; external 'obs.dll' name 'obs_get_output_source';
 function obs_get_source_by_name(AName: PAnsiChar): POBSSource; cdecl; external 'obs.dll' name 'obs_get_source_by_name';
@@ -508,5 +511,10 @@ function obs_canvas_get_video_info(ACanvas: POBSCanvas; AVideoInfo: POBSVideoInf
 procedure obs_canvas_render(ACanvas: POBSCanvas); cdecl; external 'obs.dll' name 'obs_canvas_render';
 
 implementation
+
+procedure obs_register_source(AInfo: POBSSourceInfo);
+begin
+  obs_register_source_s(AInfo, SizeOf(TOBSSourceInfo));
+end;
 
 end.

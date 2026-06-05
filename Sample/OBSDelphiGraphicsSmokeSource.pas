@@ -254,7 +254,7 @@ begin
   GraphicsSmokeSourceInfo.VideoTick:=@GraphicsSmokeSourceVideoTick;
   GraphicsSmokeSourceInfo.VideoRender:=@GraphicsSmokeSourceVideoRender;
 
-  obs_register_source_s(@GraphicsSmokeSourceInfo, SizeOf(GraphicsSmokeSourceInfo));
+  obs_register_source(@GraphicsSmokeSourceInfo);
 end;
 
 end.

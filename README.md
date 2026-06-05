@@ -10,6 +10,7 @@ This repository is being shaped around a pragmatic `0.1` release. The goal is no
 
 - Target platform: `Win64` only
 - Compiler: `dcc64`
+- Validated OBS/libobs API target: `32.1.2`
 - Primary workflow: open the projects in RAD Studio and build there
 - Local helper workflow used during development here: `WSL` invoking the Windows Delphi compiler
 - OBS naming is preserved for functions: `obs_*`, `gs_*`, `audio_output_*`, ...
